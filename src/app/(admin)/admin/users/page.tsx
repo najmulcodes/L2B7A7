@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { adminApi } from "@/lib/api/admin";
 import { Card, CardContent } from "@/components/ui/Card";
@@ -14,26 +13,29 @@ import { Pagination } from "@/components/ui/Pagination";
 import { useToast } from "@/providers/ToastProvider";
 import { ApiClientError } from "@/lib/api-client";
 import { useAuth } from "@/providers/AuthProvider";
+import { useUrlFilters } from "@/hooks/useUrlFilters";
+import { useDebouncedCallback } from "@/hooks/useDebouncedCallback";
 import { formatDate } from "@/lib/utils";
 import type { Role } from "@/types/api";
+
+export const dynamic = "force-dynamic";
 
 export default function AdminUsersPage() {
   const { user: currentUser } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const [role, setRole] = useState<Role | "">("");
-  const [isActive, setIsActive] = useState<"" | "true" | "false">("");
-  const [q, setQ] = useState("");
-  const [page, setPage] = useState(1);
+  const [filters, setFilters] = useUrlFilters({ role: "", isActive: "", q: "", page: "1" });
+  const setSearch = useDebouncedCallback((q: string) => setFilters({ q }), 400);
+  const page = Number(filters.page) || 1;
 
   const query = useQuery({
-    queryKey: ["admin-users", { role, isActive, q, page }],
+    queryKey: ["admin-users", filters],
     queryFn: () =>
       adminApi.listUsers({
-        role: role || undefined,
-        isActive: isActive || undefined,
-        q: q || undefined,
+        role: (filters.role || undefined) as Role | undefined,
+        isActive: (filters.isActive || undefined) as "true" | "false" | undefined,
+        q: filters.q || undefined,
         page,
         limit: 15,
       }),
@@ -62,36 +64,14 @@ export default function AdminUsersPage() {
       <h1 className="text-2xl font-bold text-gray-900">Users</h1>
 
       <div className="flex flex-wrap gap-3">
-        <Input
-          placeholder="Search name or email…"
-          value={q}
-          onChange={(e) => {
-            setQ(e.target.value);
-            setPage(1);
-          }}
-          className="max-w-xs"
-        />
-        <Select
-          className="max-w-[160px]"
-          value={role}
-          onChange={(e) => {
-            setRole(e.target.value as Role | "");
-            setPage(1);
-          }}
-        >
+        <Input placeholder="Search name or email…" defaultValue={filters.q} onChange={(e) => setSearch(e.target.value)} className="max-w-xs" />
+        <Select className="max-w-[160px]" value={filters.role} onChange={(e) => setFilters({ role: e.target.value })}>
           <option value="">All roles</option>
           <option value="CANDIDATE">Candidate</option>
           <option value="COMPANY">Company</option>
           <option value="ADMIN">Admin</option>
         </Select>
-        <Select
-          className="max-w-[160px]"
-          value={isActive}
-          onChange={(e) => {
-            setIsActive(e.target.value as "" | "true" | "false");
-            setPage(1);
-          }}
-        >
+        <Select className="max-w-[160px]" value={filters.isActive} onChange={(e) => setFilters({ isActive: e.target.value })}>
           <option value="">Any status</option>
           <option value="true">Active</option>
           <option value="false">Deactivated</option>
@@ -147,7 +127,7 @@ export default function AdminUsersPage() {
               <EmptyState title="No users match these filters" />
             </div>
           )}
-          <Pagination meta={query.data?.meta} onPageChange={setPage} />
+          <Pagination meta={query.data?.meta} onPageChange={(p) => setFilters({ page: String(p) })} />
         </CardContent>
       </Card>
     </div>

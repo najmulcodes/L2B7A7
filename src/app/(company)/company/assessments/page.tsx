@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { assessmentsApi } from "@/lib/api/assessments";
@@ -12,18 +11,28 @@ import { Input } from "@/components/ui/Input";
 import { Spinner } from "@/components/ui/Spinner";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Pagination } from "@/components/ui/Pagination";
+import { useUrlFilters } from "@/hooks/useUrlFilters";
+import { useDebouncedCallback } from "@/hooks/useDebouncedCallback";
 import { Plus } from "lucide-react";
 import type { AssessmentStatus } from "@/types/api";
 
+export const dynamic = "force-dynamic";
+
 export default function CompanyAssessmentsPage() {
-  const [status, setStatus] = useState<AssessmentStatus | "">("");
-  const [q, setQ] = useState("");
-  const [page, setPage] = useState(1);
+  const [filters, setFilters] = useUrlFilters({ status: "", q: "", page: "1" });
+  const setSearch = useDebouncedCallback((q: string) => setFilters({ q }), 400);
+  const page = Number(filters.page) || 1;
 
   const query = useQuery({
-    queryKey: ["assessments-mine", { status, q, page }],
+    queryKey: ["assessments-mine", filters],
     queryFn: () =>
-      assessmentsApi.list({ status: status || undefined, q: q || undefined, page, limit: 10, sortOrder: "desc" }),
+      assessmentsApi.list({
+        status: (filters.status || undefined) as AssessmentStatus | undefined,
+        q: filters.q || undefined,
+        page,
+        limit: 10,
+        sortOrder: "desc",
+      }),
   });
 
   return (
@@ -38,23 +47,8 @@ export default function CompanyAssessmentsPage() {
       </div>
 
       <div className="flex flex-wrap gap-3">
-        <Input
-          placeholder="Search…"
-          value={q}
-          onChange={(e) => {
-            setQ(e.target.value);
-            setPage(1);
-          }}
-          className="max-w-xs"
-        />
-        <Select
-          className="max-w-[160px]"
-          value={status}
-          onChange={(e) => {
-            setStatus(e.target.value as AssessmentStatus | "");
-            setPage(1);
-          }}
-        >
+        <Input placeholder="Search…" defaultValue={filters.q} onChange={(e) => setSearch(e.target.value)} className="max-w-xs" />
+        <Select className="max-w-[160px]" value={filters.status} onChange={(e) => setFilters({ status: e.target.value })}>
           <option value="">All statuses</option>
           <option value="DRAFT">Draft</option>
           <option value="PUBLISHED">Published</option>
@@ -102,7 +96,7 @@ export default function CompanyAssessmentsPage() {
               />
             </div>
           )}
-          <Pagination meta={query.data?.meta} onPageChange={setPage} />
+          <Pagination meta={query.data?.meta} onPageChange={(p) => setFilters({ page: String(p) })} />
         </CardContent>
       </Card>
     </div>

@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { invitationsApi } from "@/lib/api/invitations";
@@ -14,8 +13,11 @@ import { Pagination } from "@/components/ui/Pagination";
 import { formatDate } from "@/lib/utils";
 import { useToast } from "@/providers/ToastProvider";
 import { ApiClientError } from "@/lib/api-client";
+import { useUrlFilters } from "@/hooks/useUrlFilters";
 import { Inbox } from "lucide-react";
 import type { InvitationStatus } from "@/types/api";
+
+export const dynamic = "force-dynamic";
 
 const STATUS_OPTIONS: Array<{ value: InvitationStatus | ""; label: string }> = [
   { value: "", label: "All statuses" },
@@ -27,15 +29,15 @@ const STATUS_OPTIONS: Array<{ value: InvitationStatus | ""; label: string }> = [
 ];
 
 export default function CandidateInvitationsPage() {
-  const [status, setStatus] = useState<InvitationStatus | "">("");
-  const [page, setPage] = useState(1);
+  const [filters, setFilters] = useUrlFilters({ status: "", page: "1" });
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const router = useRouter();
+  const page = Number(filters.page) || 1;
 
   const query = useQuery({
-    queryKey: ["invitations-mine", { status, page }],
-    queryFn: () => invitationsApi.listMine({ status: status || undefined, page, limit: 10 }),
+    queryKey: ["invitations-mine", filters],
+    queryFn: () => invitationsApi.listMine({ status: (filters.status || undefined) as InvitationStatus | undefined, page, limit: 10 }),
   });
 
   const accept = useMutation({
@@ -66,13 +68,7 @@ export default function CandidateInvitationsPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Invitations</h1>
         <div className="w-48">
-          <Select
-            value={status}
-            onChange={(e) => {
-              setStatus(e.target.value as InvitationStatus | "");
-              setPage(1);
-            }}
-          >
+          <Select value={filters.status} onChange={(e) => setFilters({ status: e.target.value })}>
             {STATUS_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
                 {opt.label}
@@ -133,7 +129,7 @@ export default function CandidateInvitationsPage() {
               <EmptyState icon={<Inbox className="h-8 w-8 text-gray-300" />} title="No invitations here" />
             </div>
           )}
-          <Pagination meta={query.data?.meta} onPageChange={setPage} />
+          <Pagination meta={query.data?.meta} onPageChange={(p) => setFilters({ page: String(p) })} />
         </CardContent>
       </Card>
     </div>

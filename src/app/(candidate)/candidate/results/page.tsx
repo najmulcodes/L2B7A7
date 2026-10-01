@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { attemptsApi } from "@/lib/api/attempts";
@@ -11,9 +10,12 @@ import { Button } from "@/components/ui/Button";
 import { Spinner } from "@/components/ui/Spinner";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Pagination } from "@/components/ui/Pagination";
+import { useUrlFilters } from "@/hooks/useUrlFilters";
 import { formatDate } from "@/lib/utils";
 import { ListChecks } from "lucide-react";
 import type { AttemptStatus } from "@/types/api";
+
+export const dynamic = "force-dynamic";
 
 const STATUS_OPTIONS: Array<{ value: AttemptStatus | ""; label: string }> = [
   { value: "", label: "All statuses" },
@@ -24,12 +26,12 @@ const STATUS_OPTIONS: Array<{ value: AttemptStatus | ""; label: string }> = [
 ];
 
 export default function CandidateResultsPage() {
-  const [status, setStatus] = useState<AttemptStatus | "">("");
-  const [page, setPage] = useState(1);
+  const [filters, setFilters] = useUrlFilters({ status: "", page: "1" });
+  const page = Number(filters.page) || 1;
 
   const query = useQuery({
-    queryKey: ["attempts-mine-all", { status, page }],
-    queryFn: () => attemptsApi.listMine({ status: status || undefined, page, limit: 10 }),
+    queryKey: ["attempts-mine-all", filters],
+    queryFn: () => attemptsApi.listMine({ status: (filters.status || undefined) as AttemptStatus | undefined, page, limit: 10 }),
   });
 
   return (
@@ -40,13 +42,7 @@ export default function CandidateResultsPage() {
           <p className="text-gray-500">Every assessment attempt you&apos;ve started, in one place.</p>
         </div>
         <div className="w-48">
-          <Select
-            value={status}
-            onChange={(e) => {
-              setStatus(e.target.value as AttemptStatus | "");
-              setPage(1);
-            }}
-          >
+          <Select value={filters.status} onChange={(e) => setFilters({ status: e.target.value })}>
             {STATUS_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
                 {opt.label}
@@ -98,7 +94,7 @@ export default function CandidateResultsPage() {
               <EmptyState icon={<ListChecks className="h-8 w-8 text-gray-300" />} title="No attempts yet" />
             </div>
           )}
-          <Pagination meta={query.data?.meta} onPageChange={setPage} />
+          <Pagination meta={query.data?.meta} onPageChange={(p) => setFilters({ page: String(p) })} />
         </CardContent>
       </Card>
     </div>

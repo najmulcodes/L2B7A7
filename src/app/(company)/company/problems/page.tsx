@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { problemsApi } from "@/lib/api/problems";
@@ -14,24 +13,30 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { Pagination } from "@/components/ui/Pagination";
 import { useToast } from "@/providers/ToastProvider";
 import { ApiClientError } from "@/lib/api-client";
+import { useUrlFilters } from "@/hooks/useUrlFilters";
+import { useDebouncedCallback } from "@/hooks/useDebouncedCallback";
 import { Plus, Trash2, Pencil } from "lucide-react";
 import type { Difficulty, ProblemType } from "@/types/api";
 
+// This page's filters/search/pagination live in the URL (useUrlFilters
+// below), which requires dynamic rendering rather than static prerendering.
+export const dynamic = "force-dynamic";
+
 export default function CompanyProblemsPage() {
-  const [type, setType] = useState<ProblemType | "">("");
-  const [difficulty, setDifficulty] = useState<Difficulty | "">("");
-  const [q, setQ] = useState("");
-  const [page, setPage] = useState(1);
+  const [filters, setFilters] = useUrlFilters({ type: "", difficulty: "", q: "", page: "1" });
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const page = Number(filters.page) || 1;
+
+  const setSearch = useDebouncedCallback((q: string) => setFilters({ q }), 400);
 
   const query = useQuery({
-    queryKey: ["problems", { type, difficulty, q, page }],
+    queryKey: ["problems", filters],
     queryFn: () =>
       problemsApi.list({
-        type: type || undefined,
-        difficulty: difficulty || undefined,
-        q: q || undefined,
+        type: (filters.type || undefined) as ProblemType | undefined,
+        difficulty: (filters.difficulty || undefined) as Difficulty | undefined,
+        q: filters.q || undefined,
         page,
         limit: 10,
       }),
@@ -60,21 +65,11 @@ export default function CompanyProblemsPage() {
       <div className="flex flex-wrap gap-3">
         <Input
           placeholder="Search title or description…"
-          value={q}
-          onChange={(e) => {
-            setQ(e.target.value);
-            setPage(1);
-          }}
+          defaultValue={filters.q}
+          onChange={(e) => setSearch(e.target.value)}
           className="max-w-xs"
         />
-        <Select
-          className="max-w-[160px]"
-          value={type}
-          onChange={(e) => {
-            setType(e.target.value as ProblemType | "");
-            setPage(1);
-          }}
-        >
+        <Select className="max-w-[160px]" value={filters.type} onChange={(e) => setFilters({ type: e.target.value })}>
           <option value="">All types</option>
           <option value="MCQ">MCQ</option>
           <option value="CODING">Coding</option>
@@ -82,11 +77,8 @@ export default function CompanyProblemsPage() {
         </Select>
         <Select
           className="max-w-[160px]"
-          value={difficulty}
-          onChange={(e) => {
-            setDifficulty(e.target.value as Difficulty | "");
-            setPage(1);
-          }}
+          value={filters.difficulty}
+          onChange={(e) => setFilters({ difficulty: e.target.value })}
         >
           <option value="">All difficulties</option>
           <option value="EASY">Easy</option>
@@ -146,7 +138,7 @@ export default function CompanyProblemsPage() {
               />
             </div>
           )}
-          <Pagination meta={query.data?.meta} onPageChange={setPage} />
+          <Pagination meta={query.data?.meta} onPageChange={(p) => setFilters({ page: String(p) })} />
         </CardContent>
       </Card>
     </div>
