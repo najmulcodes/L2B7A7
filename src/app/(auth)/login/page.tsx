@@ -14,6 +14,7 @@ import { FieldError } from "@/components/ui/FieldError";
 import { Button } from "@/components/ui/Button";
 import { Alert } from "@/components/ui/Alert";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
+import { DemoLoginButtons } from "@/components/auth/DemoLoginButtons";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -67,7 +68,8 @@ export default function LoginPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Log in to CodeRank</CardTitle>
+        <CardTitle>Welcome back 👋</CardTitle>
+        <p className="mt-1 text-sm text-gray-500">Log in to your account</p>
       </CardHeader>
       <CardContent>
         {formError && (
@@ -87,7 +89,7 @@ export default function LoginPage() {
             <FieldError message={errors.password?.message} />
           </div>
           <Button type="submit" className="w-full" isLoading={isSubmitting}>
-            Log in
+            🔐 Log in
           </Button>
         </form>
         <p className="mt-4 text-center text-sm text-gray-500">
@@ -97,9 +99,16 @@ export default function LoginPage() {
           </Link>
         </p>
 
-        <div className="my-4 flex items-center gap-3 text-xs text-gray-400">
+        <div className="my-5 flex items-center gap-3 text-xs font-medium text-gray-400">
           <div className="h-px flex-1 bg-gray-200" />
           OR
+          <div className="h-px flex-1 bg-gray-200" />
+        </div>
+
+        <DemoLoginButtons onNavigate={(path) => router.push(path)} />
+
+        <div className="my-5 flex items-center gap-3 text-xs text-gray-400">
+          <div className="h-px flex-1 bg-gray-200" />
           <div className="h-px flex-1 bg-gray-200" />
         </div>
         <GoogleSignInButton
