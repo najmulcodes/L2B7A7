@@ -1,6 +1,12 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
+  // "class" (not the default "media") so dark: variants only activate once
+  // a theme toggle actually adds a .dark class to <html> — otherwise every
+  // dark: utility already in use (e.g. the Logo wordmark) would silently
+  // flip on for anyone with OS-level dark mode enabled, before the rest of
+  // the app has any dark-mode-aware styling to go with it.
+  darkMode: "class",
   content: ["./src/**/*.{ts,tsx}"],
   theme: {
     extend: {

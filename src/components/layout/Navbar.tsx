@@ -6,6 +6,7 @@ import { useAuth } from "@/providers/AuthProvider";
 import { cn } from "@/lib/utils";
 import { LogOut, User as UserIcon } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { Logo } from "@/components/ui/Logo";
 
 interface NavLink {
   href: string;
@@ -44,8 +45,8 @@ export function Navbar() {
     <header className="sticky top-0 z-40 border-b border-gray-200 bg-white/90 backdrop-blur">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
         <div className="flex items-center gap-6">
-          <Link href="/" className="text-lg font-bold text-brand-700">
-            CodeRank
+          <Link href="/">
+            <Logo size="sm" />
           </Link>
           <nav className="hidden gap-1 sm:flex">
             {links.map((link) => (

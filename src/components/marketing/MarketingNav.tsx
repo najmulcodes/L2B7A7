@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Logo } from "@/components/ui/Logo";
 
 const LINKS = [
   { href: "/about", label: "About" },
@@ -14,8 +15,8 @@ export function MarketingNav() {
   return (
     <header className="border-b border-gray-200">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-        <Link href="/" className="text-lg font-semibold tracking-tight text-gray-900">
-          CodeRank
+        <Link href="/">
+          <Logo />
         </Link>
         <nav className="hidden items-center gap-6 md:flex">
           {LINKS.map((link) => (
