@@ -15,12 +15,9 @@ import { Button } from "@/components/ui/Button";
 import { Alert } from "@/components/ui/Alert";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 import { DemoLoginButtons } from "@/components/auth/DemoLoginButtons";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-
-// useSearchParams() below requires this page to be dynamically rendered
-// rather than statically prerendered at build time.
-export const dynamic = "force-dynamic";
+import { Spinner } from "@/components/ui/Spinner";
 
 const ROLE_HOME: Record<string, string> = {
   CANDIDATE: "/candidate/dashboard",
@@ -28,7 +25,22 @@ const ROLE_HOME: Record<string, string> = {
   ADMIN: "/admin/dashboard",
 };
 
+// useSearchParams() in LoginForm below opts this route out of static
+// prerendering. Next.js's build-time static export still requires that
+// bail-out to happen inside a <Suspense> boundary (an `export const dynamic
+// = "force-dynamic"` alone does NOT suppress this check in 14.2.15 — it
+// still fails with "useSearchParams() should be wrapped in a suspense
+// boundary" during `next build`'s "Generating static pages" step). This
+// wrapper is the actual fix; LoginForm holds all the real logic.
 export default function LoginPage() {
+  return (
+    <Suspense fallback={<Spinner label="Loading…" />}>
+      <LoginForm />
+    </Suspense>
+  );
+}
+
+function LoginForm() {
   const { login } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();

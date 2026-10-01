@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
@@ -16,9 +16,26 @@ import { CheckCircle2 } from "lucide-react";
 // asynchronous. We poll GET /payments/me (matching by Stripe's
 // `session_id` query param against each payment's providerSessionId) until
 // the matching payment's status flips out of PENDING.
-export const dynamic = "force-dynamic";
-
+//
+// useSearchParams() in PaymentSuccessContent below requires a <Suspense>
+// boundary around it for `next build`'s static export pass — an
+// `export const dynamic = "force-dynamic"` alone does not suppress that
+// check in Next 14.2.15. This wrapper is the actual fix.
 export default function PaymentSuccessPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="flex min-h-screen items-center justify-center">
+          <Spinner label="Loading…" />
+        </main>
+      }
+    >
+      <PaymentSuccessContent />
+    </Suspense>
+  );
+}
+
+function PaymentSuccessContent() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
   const [attempts, setAttempts] = useState(0);
