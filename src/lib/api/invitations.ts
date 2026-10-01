@@ -5,6 +5,7 @@ export interface ListInvitationsQuery {
   page?: number;
   limit?: number;
   status?: InvitationStatus;
+  [key: string]: string | number | undefined;
 }
 
 export const invitationsApi = {

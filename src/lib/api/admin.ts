@@ -7,6 +7,7 @@ export interface ListAdminUsersQuery {
   role?: Role;
   q?: string;
   isActive?: "true" | "false";
+  [key: string]: string | number | undefined;
 }
 
 export interface ListAuditLogsQuery {
@@ -15,6 +16,7 @@ export interface ListAuditLogsQuery {
   entity?: string;
   action?: string;
   actorId?: string;
+  [key: string]: string | number | undefined;
 }
 
 export const adminApi = {

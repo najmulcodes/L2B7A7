@@ -25,6 +25,7 @@ export interface ListProblemsQuery {
   q?: string;
   sortBy?: "createdAt" | "points" | "title";
   sortOrder?: "asc" | "desc";
+  [key: string]: string | number | undefined;
 }
 
 export const problemsApi = {

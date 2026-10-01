@@ -5,6 +5,7 @@ export interface ListAttemptsQuery {
   page?: number;
   limit?: number;
   status?: AttemptStatus;
+  [key: string]: string | number | undefined;
 }
 
 export interface SubmitAnswerInput {

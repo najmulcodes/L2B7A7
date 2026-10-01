@@ -1,7 +1,26 @@
 // Server-only. Talks to the real CodeRank backend. Never imported from
 // client components — only from route handlers under src/app/api/**.
 
-const BACKEND_API_URL = process.env.BACKEND_API_URL ?? "http://localhost:5000/api/v1";
+// Strip a trailing slash so "http://host/api/v1/" + "/auth/login" doesn't
+// become a double slash ("//auth/login"), which some routers 404 on.
+const RAW_BACKEND_API_URL = process.env.BACKEND_API_URL ?? "http://localhost:5000/api/v1";
+const BACKEND_API_URL = RAW_BACKEND_API_URL.replace(/\/+$/, "");
+
+if (process.env.NODE_ENV !== "production" && !/\/api\/v\d+$/.test(BACKEND_API_URL)) {
+  // Soft warning only — the backend's own version prefix could change, so
+  // this doesn't block anything. But the single most common setup mistake
+  // is pointing BACKEND_API_URL at the bare host (e.g. "http://localhost:5000")
+  // instead of including the mounted API prefix (e.g. "http://localhost:5000/api/v1"),
+  // which silently 404s on every single request with a confusing
+  // "Route not found: POST /auth/login" (missing the /api/v1 the backend
+  // actually expects). Flag it loudly in dev so it's not a mystery.
+  // eslint-disable-next-line no-console
+  console.warn(
+    `[coderank] BACKEND_API_URL is "${BACKEND_API_URL}" — this doesn't look like it includes the backend's ` +
+      `mounted API prefix (e.g. "/api/v1"). If every request 404s with "Route not found: <method> /<path>" ` +
+      `(no /api/v1 in that message), this is almost certainly why. Check .env.local.`,
+  );
+}
 
 export interface BackendResult<T = unknown> {
   status: number;
@@ -48,6 +67,13 @@ export async function callBackend<T = unknown>(
     body = await res.json();
   } catch {
     body = { success: false, message: `Backend returned a non-JSON response (${res.status})`, errors: [] };
+  }
+
+  // Dev-only breadcrumb: append the exact URL we hit so a misconfigured
+  // BACKEND_API_URL is obvious from the error message itself, not just the
+  // server console. Never done in production (don't leak internal URLs).
+  if (process.env.NODE_ENV !== "production" && !res.ok) {
+    body = { ...body, message: `${body.message} [requested ${init.method ?? "GET"} ${url.toString()}]` };
   }
 
   return { status: res.status, ok: res.ok, body };

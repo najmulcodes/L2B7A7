@@ -17,6 +17,7 @@ export interface ListAssessmentsQuery {
   q?: string;
   sortBy?: "createdAt" | "title" | "durationMinutes";
   sortOrder?: "asc" | "desc";
+  [key: string]: string | number | undefined;
 }
 
 export const assessmentsApi = {

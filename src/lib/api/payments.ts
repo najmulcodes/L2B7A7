@@ -11,6 +11,7 @@ export interface ListPaymentsQuery {
   page?: number;
   limit?: number;
   status?: PaymentStatus;
+  [key: string]: string | number | undefined;
 }
 
 export const paymentsApi = {
