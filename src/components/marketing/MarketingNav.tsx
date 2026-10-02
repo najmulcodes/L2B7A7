@@ -31,7 +31,7 @@ export function MarketingNav() {
           </Link>
           <Link
             href="/register"
-            className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
+            className="rounded-lg bg-signal-500 px-4 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-signal-600"
           >
             Get started
           </Link>

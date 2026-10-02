@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ReportPreview } from "./ReportPreview";
+import { InteractiveDemo } from "./InteractiveDemo";
 import { MarketingNav } from "./MarketingNav";
 import { MarketingFooter } from "./MarketingFooter";
 
@@ -46,10 +46,10 @@ export function LandingPage() {
       <MarketingNav />
 
       {/* ---------- Hero ---------- */}
-      <section className="bg-[#0B0D12]">
+      <section className="surface-grain bg-ink">
         <div className="mx-auto grid max-w-6xl gap-12 px-6 py-20 lg:grid-cols-[1.1fr_1fr] lg:items-center lg:py-28">
           <div>
-            <h1 className="max-w-lg text-4xl font-semibold leading-[1.1] tracking-tight text-white sm:text-5xl">
+            <h1 className="max-w-lg font-display text-4xl font-semibold leading-[1.05] tracking-tight text-white sm:text-5xl">
               Assess developers the way you&apos;ll actually hire them.
             </h1>
             <p className="mt-5 max-w-md text-lg leading-relaxed text-white/60">
@@ -59,26 +59,27 @@ export function LandingPage() {
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
                 href="/register"
-                className="rounded-lg bg-brand-500 px-5 py-3 text-sm font-medium text-white hover:bg-brand-600"
+                className="rounded-lg bg-signal-500 px-5 py-3 text-sm font-medium text-white transition-colors duration-150 hover:bg-signal-600"
               >
                 Start as a company
               </Link>
               <Link
                 href="/register"
-                className="rounded-lg border border-white/15 px-5 py-3 text-sm font-medium text-white hover:bg-white/5"
+                className="rounded-lg border border-white/15 px-5 py-3 text-sm font-medium text-white transition-colors duration-150 hover:bg-white/5"
               >
                 Start as a candidate
               </Link>
             </div>
-            <div className="mt-10 flex gap-6 text-sm text-white/40">
-              <span>Multiple choice</span>
-              <span>Coding</span>
-              <span>Written</span>
+            <div className="mt-10 flex gap-6 font-mono text-xs text-white/30">
+              {/* Real backend enum values (ProblemType), not invented labels */}
+              <span>MCQ</span>
+              <span>CODING</span>
+              <span>WRITTEN</span>
             </div>
           </div>
 
           <div className="flex justify-center lg:justify-end">
-            <ReportPreview />
+            <InteractiveDemo />
           </div>
         </div>
       </section>
@@ -87,19 +88,19 @@ export function LandingPage() {
       <section className="mx-auto max-w-6xl px-6 py-20">
         <div className="grid gap-10 md:grid-cols-2">
           <div className="rounded-2xl border border-gray-200 p-8">
-            <h2 className="text-xl font-semibold text-gray-900">For hiring teams</h2>
+            <h2 className="font-display text-xl font-semibold text-gray-900">For hiring teams</h2>
             <p className="mt-2 text-gray-500">Run a consistent process across every role you&apos;re hiring for.</p>
             <ul className="mt-6 space-y-3">
               {COMPANY_POINTS.map((point) => (
                 <li key={point} className="flex gap-3 text-sm text-gray-700">
-                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-500" />
+                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-signal-500" />
                   {point}
                 </li>
               ))}
             </ul>
           </div>
           <div className="rounded-2xl border border-gray-200 p-8">
-            <h2 className="text-xl font-semibold text-gray-900">For candidates</h2>
+            <h2 className="font-display text-xl font-semibold text-gray-900">For candidates</h2>
             <p className="mt-2 text-gray-500">Know exactly what you&apos;re walking into before the clock starts.</p>
             <ul className="mt-6 space-y-3">
               {CANDIDATE_POINTS.map((point) => (
@@ -116,11 +117,11 @@ export function LandingPage() {
       {/* ---------- How it moves ---------- */}
       <section className="border-y border-gray-200 bg-[#F6F7F9]">
         <div className="mx-auto max-w-6xl px-6 py-20">
-          <h2 className="text-2xl font-semibold tracking-tight text-gray-900">How an assessment moves</h2>
+          <h2 className="font-display text-2xl font-semibold tracking-tight text-gray-900">How an assessment moves</h2>
           <div className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {STAGES.map((stage) => (
               <div key={stage.n}>
-                <span className="font-mono text-sm text-brand-600">{stage.n}</span>
+                <span className="font-mono text-sm text-signal-600">{stage.n}</span>
                 <h3 className="mt-2 font-medium text-gray-900">{stage.title}</h3>
                 <p className="mt-1.5 text-sm leading-relaxed text-gray-500">{stage.body}</p>
               </div>
@@ -130,14 +131,14 @@ export function LandingPage() {
       </section>
 
       {/* ---------- CTA band ---------- */}
-      <section className="bg-[#0B0D12]">
+      <section className="bg-ink">
         <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 px-6 py-16 sm:flex-row sm:items-center">
-          <h2 className="max-w-md text-2xl font-semibold tracking-tight text-white">
+          <h2 className="max-w-md font-display text-2xl font-semibold tracking-tight text-white">
             Set up your first assessment in a few minutes.
           </h2>
           <Link
             href="/register"
-            className="shrink-0 rounded-lg bg-white px-5 py-3 text-sm font-medium text-gray-900 hover:bg-white/90"
+            className="shrink-0 rounded-lg bg-signal-500 px-5 py-3 text-sm font-medium text-white transition-colors duration-150 hover:bg-signal-600"
           >
             Create an account
           </Link>
