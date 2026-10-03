@@ -6,19 +6,27 @@
 const RAW_BACKEND_API_URL = process.env.BACKEND_API_URL ?? "http://localhost:5000/api/v1";
 const BACKEND_API_URL = RAW_BACKEND_API_URL.replace(/\/+$/, "");
 
-if (process.env.NODE_ENV !== "production" && !/\/api\/v\d+$/.test(BACKEND_API_URL)) {
+if (!/\/api\/v\d+$/.test(BACKEND_API_URL)) {
   // Soft warning only — the backend's own version prefix could change, so
   // this doesn't block anything. But the single most common setup mistake
   // is pointing BACKEND_API_URL at the bare host (e.g. "http://localhost:5000")
   // instead of including the mounted API prefix (e.g. "http://localhost:5000/api/v1"),
   // which silently 404s on every single request with a confusing
   // "Route not found: POST /auth/login" (missing the /api/v1 the backend
-  // actually expects). Flag it loudly in dev so it's not a mystery.
+  // actually expects).
+  //
+  // Deliberately NOT gated behind NODE_ENV — this only ever writes to the
+  // server's own log (Vercel Function Logs, a local terminal, etc.), never
+  // to anything a client can see, so there's no reason to suppress it in
+  // production specifically. A misconfigured env var in a Vercel project's
+  // settings is exactly the case where the server console is the ONLY
+  // place this would ever surface, and that's the environment most likely
+  // to have a typo'd or missing env var in the first place.
   // eslint-disable-next-line no-console
   console.warn(
     `[coderank] BACKEND_API_URL is "${BACKEND_API_URL}" — this doesn't look like it includes the backend's ` +
       `mounted API prefix (e.g. "/api/v1"). If every request 404s with "Route not found: <method> /<path>" ` +
-      `(no /api/v1 in that message), this is almost certainly why. Check .env.local.`,
+      `(no /api/v1 in that message), this is almost certainly why. Check this environment's BACKEND_API_URL.`,
   );
 }
 
