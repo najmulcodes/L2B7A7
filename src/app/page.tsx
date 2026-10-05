@@ -12,10 +12,14 @@ export const metadata: Metadata = {
   },
 };
 
-// A genuine Server Component: the "am I already logged in?" redirect now
-// happens in src/middleware.ts (reading the same non-httpOnly role cookie
-// it already uses for /login and /register), so this page never ships a
-// client-side auth check or a loading spinner — it just renders.
+// A genuine Server Component — no auth check here at all, on purpose.
+// This used to redirect an "already logged in" visitor straight to their
+// dashboard (first client-side, then via middleware reading a cookie), but
+// both versions could bounce someone with a stale/expired session cookie
+// through a dashboard that immediately rejects it and back out to /login —
+// confusing, and looked like "/ redirects to /login" with no explanation.
+// Simplest fix: / always just renders the marketing page, full stop. A
+// logged-in visitor can use the nav or the Log in link like anyone else.
 export default function HomePage() {
   return <LandingPage />;
 }

@@ -6,7 +6,20 @@ import { NextResponse, type NextRequest } from "next/server";
 // by the backend on every request (see authorize.middleware.ts in the
 // backend repo). Its only job here is to avoid flashing the wrong
 // dashboard before the client-side AuthProvider resolves.
-
+//
+// Deliberately does NOT redirect "/", "/login", or "/register" away based
+// on cookie presence (it used to). Cookie presence only means "there was a
+// session at some point" — it says nothing about whether that token is
+// still valid. A stale/expired cookie (e.g. left over from earlier manual
+// testing) caused a confusing bounce: "/" → middleware redirects to
+// /admin/dashboard because a cookie exists → that page's real auth check
+// round-trips to the backend → backend correctly rejects the dead token →
+// the app clears cookies and sends you to /login. The visible result was
+// "/ instantly redirects to /login" with no way to tell why. The
+// still-logged-in-so-skip-the-form convenience for /login and /register is
+// now handled client-side instead (see those pages), using the REAL
+// backend-validated session from AuthProvider rather than raw cookie
+// presence — which self-corrects instead of bouncing.
 const ROLE_HOME: Record<string, string> = {
   CANDIDATE: "/candidate/dashboard",
   COMPANY: "/company/dashboard",
@@ -40,15 +53,9 @@ export function middleware(req: NextRequest) {
     }
   }
 
-  if ((pathname === "/login" || pathname === "/register" || pathname === "/") && hasSession && role && ROLE_HOME[role]) {
-    const url = req.nextUrl.clone();
-    url.pathname = ROLE_HOME[role];
-    return NextResponse.redirect(url);
-  }
-
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/candidate/:path*", "/company/:path*", "/admin/:path*", "/login", "/register", "/"],
+  matcher: ["/candidate/:path*", "/company/:path*", "/admin/:path*"],
 };

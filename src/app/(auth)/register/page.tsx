@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { registerSchema, type RegisterFormValues } from "@/lib/validation/auth";
 import { useAuth } from "@/providers/AuthProvider";
 import { ApiClientError } from "@/lib/api-client";
@@ -22,9 +22,17 @@ const ROLE_HOME: Record<string, string> = {
 };
 
 export default function RegisterPage() {
-  const { register: registerUser } = useAuth();
+  const { register: registerUser, user, isLoading } = useAuth();
   const router = useRouter();
   const [formError, setFormError] = useState<string | null>(null);
+
+  // Same reasoning as the login page: redirect a genuinely-still-logged-in
+  // visitor, keyed off the real backend-validated `user`, not a cookie.
+  useEffect(() => {
+    if (!isLoading && user && ROLE_HOME[user.role]) {
+      router.replace(ROLE_HOME[user.role]);
+    }
+  }, [isLoading, user, router]);
 
   const {
     register,

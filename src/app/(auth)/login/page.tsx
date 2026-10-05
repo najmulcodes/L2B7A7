@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/Button";
 import { Alert } from "@/components/ui/Alert";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 import { DemoLoginButtons } from "@/components/auth/DemoLoginButtons";
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Spinner } from "@/components/ui/Spinner";
 
@@ -41,11 +41,24 @@ export default function LoginPage() {
 }
 
 function LoginForm() {
-  const { login } = useAuth();
+  const { login, user, isLoading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const [formError, setFormError] = useState<string | null>(null);
+
+  // Redirect a genuinely-still-logged-in visitor straight to their
+  // dashboard, skipping the form. Deliberately keyed off `user` (the real,
+  // backend-validated session from AuthProvider) rather than cookie
+  // presence — a stale/expired cookie self-corrects here (AuthProvider
+  // clears it and `user` stays null) instead of bouncing through a
+  // dashboard that immediately rejects it.
+  useEffect(() => {
+    if (!isLoading && user) {
+      const next = searchParams.get("next");
+      router.replace(next ?? ROLE_HOME[user.role] ?? "/");
+    }
+  }, [isLoading, user, router, searchParams]);
 
   const {
     register,
