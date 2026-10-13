@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { InteractiveDemo } from "./InteractiveDemo";
 import { MarketingNav } from "./MarketingNav";
 import { MarketingFooter } from "./MarketingFooter";
@@ -84,11 +85,50 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* ---------- Two sides ---------- */}
+      {/* ---------- Product snapshot ---------- */}
       <section className="mx-auto max-w-6xl px-6 py-20">
+        <div className="grid items-center gap-12 lg:grid-cols-[1fr_1fr]">
+          <div>
+            <h2 className="font-display text-2xl font-semibold tracking-tight text-gray-900">
+              Every submission gets reviewed the same way
+            </h2>
+            <p className="mt-3 max-w-md text-gray-500">
+              Multiple-choice is scored the instant a candidate submits. Written and coding answers wait in your
+              review queue until someone on your team grades them — so a pass or fail always means a human looked at
+              it, not just an autograder.
+            </p>
+          </div>
+          <div className="flex justify-center">
+            {/* Eager-loaded (priority): this is the first real product visual
+                a visitor scrolls to, so it should paint immediately rather
+                than lazy-load like the illustrations further down the page. */}
+            <Image
+              src="/images/hero-assessment.svg"
+              alt="An assessment panel with reviewed code lines next to a pass badge"
+              width={560}
+              height={440}
+              priority
+              className="h-auto w-full max-w-md"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* ---------- Two sides ---------- */}
+      <section className="mx-auto max-w-6xl px-6 pb-20">
         <div className="grid gap-10 md:grid-cols-2">
           <div className="rounded-2xl border border-gray-200 p-8">
-            <h2 className="font-display text-xl font-semibold text-gray-900">For hiring teams</h2>
+            {/* Below the fold by this point — next/image lazy-loads these by
+                default (no `priority`), so neither one competes with the
+                hero image or the interactive demo for bandwidth on load. */}
+            <Image
+              src="/images/illustration-problem-bank.svg"
+              alt="A stack of problem cards representing a reusable problem bank"
+              width={320}
+              height={240}
+              className="h-auto w-full max-w-[220px]"
+            />
+            <h2 className="mt-6 font-display text-xl font-semibold text-gray-900">For hiring teams</h2>
             <p className="mt-2 text-gray-500">Run a consistent process across every role you&apos;re hiring for.</p>
             <ul className="mt-6 space-y-3">
               {COMPANY_POINTS.map((point) => (
@@ -100,7 +140,14 @@ export function LandingPage() {
             </ul>
           </div>
           <div className="rounded-2xl border border-gray-200 p-8">
-            <h2 className="font-display text-xl font-semibold text-gray-900">For candidates</h2>
+            <Image
+              src="/images/illustration-timed-attempt.svg"
+              alt="A countdown timer with a progress ring representing a timed candidate attempt"
+              width={320}
+              height={240}
+              className="h-auto w-full max-w-[220px]"
+            />
+            <h2 className="mt-6 font-display text-xl font-semibold text-gray-900">For candidates</h2>
             <p className="mt-2 text-gray-500">Know exactly what you&apos;re walking into before the clock starts.</p>
             <ul className="mt-6 space-y-3">
               {CANDIDATE_POINTS.map((point) => (
